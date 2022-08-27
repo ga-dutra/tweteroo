@@ -13,9 +13,7 @@ server.post("/sign-up", (req, res) => {
   console.log(req.body);
   const { username, avatar } = req.body;
   if (!username || !avatar) {
-    return res
-      .status(404)
-      .send("Para realizar o login, digite um usuário e avatar válidos");
+    return res.status(400).send("Todos os campos são obrigatórios!");
   }
   serverUsers.push(req.body);
   console.log(serverUsers);
@@ -29,13 +27,15 @@ server.get("/tweets", (req, res) => {
     const user = serverUsers.find((user) => user.username === tweet.username);
     return { avatar: user.avatar, ...tweet };
   });
-  res.send(displayedTweets);
+  res.send(
+    displayedTweets.length < 10 ? displayedTweets : displayedTweets.slice(0, 10)
+  );
 });
 
 server.post("/tweets", (req, res) => {
   const { username, tweet } = req.body;
-  if (!tweet) {
-    return res.status(404).send("Por favor, digite um tweet válido!");
+  if (!tweet || !username) {
+    return res.status(400).send("Todos os campos são obrigatórios!");
   }
   const newTweet = { username: username, tweet: tweet };
   tweetsList.unshift(newTweet);
