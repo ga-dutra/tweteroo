@@ -12,18 +12,31 @@ server.post("/sign-up", (req, res) => {
   const { username, avatar } = req.body;
 
   if (!username || !avatar) {
-    return res.status(400).send("Todos os campos são obrigatórios!");
+    return res.status(400).send({ error: "Todos os campos são obrigatórios!" });
+  }
+
+  if (!checkUrl(avatar)) {
+    return res.status(400).send({ error: "A imagem deve ser uma URL válida!" });
   }
 
   serverUsers.push(req.body);
-  res.status(201).send("OK");
+  res.status(201).send({ message: "OK" });
 });
+
+function checkUrl(string) {
+  try {
+    let url = new URL(string);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
 
 server.get("/tweets", (req, res) => {
   const page = Number(req.query.page);
 
   if (!page || page < 1) {
-    return res.status(400).send("Informe uma página válida!");
+    return res.status(400).send({ error: "Informe uma página válida!" });
   }
 
   if (page !== 1 && tweetsList.length < 10 * (page - 1)) return;
@@ -45,12 +58,12 @@ server.post("/tweets", (req, res) => {
   const username = req.headers.user;
 
   if (!tweet || !username) {
-    return res.status(400).send("Todos os campos são obrigatórios!");
+    return res.status(400).send({ error: "Todos os campos são obrigatórios!" });
   }
 
   const newTweet = { username: username, tweet: tweet };
   tweetsList.unshift(newTweet);
-  res.status(201).send("OK");
+  res.status(201).send({ message: "OK" });
 });
 
 server.get("/tweets/:username", (req, res) => {
@@ -58,7 +71,7 @@ server.get("/tweets/:username", (req, res) => {
   const serverUsernames = serverUsers.map((user) => user.username);
 
   if (serverUsernames.indexOf(username) === -1) {
-    res.status(404).send("O usuário deve ser válido!");
+    res.status(404).send({ error: "O usuário deve ser válido!" });
   }
 
   const userTweets = tweetsList.map((tweet) => {
